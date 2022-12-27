@@ -1,0 +1,42 @@
+  version: '3.7'
+
+  services:
+
+    web:
+      
+      build: .
+      
+      command: python /bmg/manage.py runserver 0.0.0.0:8000
+
+      environment:
+        - SECRET_KEY=django-insecure-j!bisxxa*1*6vmofvr2&c8#rbsv+e6f@pw=%gojg_#!pz00nh!
+        - DEBUG=1
+        - db_name=postgres
+        - db_user=postgres
+        - db_pass=postgres
+        - db_host=db
+        - db_port=5432
+      
+      volumes:
+        - .:/bmg
+
+      ports:
+        - 8000:8000
+
+      depends_on:
+        - db
+
+    db:
+      image: postgres:11
+
+      volumes:
+        - postgres_data:/var/lib/postgresql/data/
+
+      environment:
+        - POSTGRES_DB=postgres
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        
+        
+  volumes:
+    postgres_data:
