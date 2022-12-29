@@ -12,6 +12,9 @@ urlpatterns = [
     path('login/', LoginAPIView.as_view(), name="login"),
     path('logout/', LogoutAPIView.as_view(), name="logout"),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path("password-reset/", PasswordResetView.as_view(), name="password-reset"),
+    path("password-reset-confirm/<uidb64>/<token>/", PasswordResetConfirmView.as_view(), name="password-reset-confirm"),
+    
 
     # product
     path('products/', ProductListAPIView.as_view(), name='product-list'),
@@ -26,7 +29,7 @@ urlpatterns = [
     path('category/delete/<int:pk>/', CategoryDeleteAPIView.as_view(), name='category-delete'),
 
     # wishlist
-    path('wishlist/', WishListView.as_view(), name='wishlist-create'),
+    # path('wishlist/', WishListView.as_view(), name='wishlist-create'),
     # path('wishlist/view/', WishListProductListView.as_view(), name='wishlist-view'),
     # path('wishlist/<str:pk>/view/', WishListProductListViewByIdentifier.as_view(), name='wishlist-view'),
 

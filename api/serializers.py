@@ -2,6 +2,11 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from product.models import *
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
+from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
 
 
 User = get_user_model()
@@ -57,6 +62,19 @@ class LoginSerializer(serializers.Serializer):
             return user
         raise serializers.ValidationError("Incorrect Credentials")
 
+
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    new_password = serializers.CharField(max_length=128)
+    re_new_password = serializers.CharField(max_length=128)
+
+    def validate(self, data):
+        if data["new_password"] != data["re_new_password"]:
+            raise serializers.ValidationError("Passwords do not match.")
+        return data
 
 
 
