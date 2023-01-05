@@ -26,11 +26,11 @@ class Product(models.Model):
 
 
 class WishList(models.Model):
-    name = models.CharField(max_length=255)
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     products = models.ManyToManyField(Product, blank=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.user.email}'s wishlist"
     
     

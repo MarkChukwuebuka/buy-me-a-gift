@@ -85,7 +85,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = (
-            
+            'id',
             'name',
             'category',
             'price',
@@ -99,12 +99,14 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = (
+            
             'name',
             'price',
             'category',
             'rank',
 
         )
+
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -114,38 +116,42 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class WishListCreateSerializer(serializers.ModelSerializer):
+
+
+
+class WishListSerializer(serializers.ModelSerializer):
+    products = serializers.PrimaryKeyRelatedField(many=True, queryset=Product.objects.all())
 
     class Meta:
         model = WishList
-        fields = '__all__'
-
-    # products = serializers.ListField(child=ProductSerializer())
-
-    def validate(self, data):
-        categories = set()
-        for product in data['products']:
-            category = product['category']
-            if category in categories:
-                raise serializers.ValidationError(
-                    "You can only add one product from each category to the wishlist"
-                )
-            categories.add(category)
-        return data
+        fields = ('products',)
 
 
+    def update(self, instance, validated_data):
+        
+        products = validated_data.pop('products')
+        instance.save()
+        for product in products:
+            if not instance.products.filter(category=product.category).exists():
+                instance.products.add(product)
+            else:
+                raise serializers.ValidationError('Cannot add multiple products from the same category')
+        return instance
 
 
-class WishListSerializer(serializers.Serializer):
-    products = serializers.ListField(child=ProductSerializer())
+class WishlistByIdentifierSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.email', read_only=True)
 
-    def validate(self, data):
-        categories = set()
-        for product in data['products']:
-            category = product['category']
-            if category in categories:
-                raise serializers.ValidationError(
-                    "You can only add one product from each category to the wishlist"
-                )
-            categories.add(category)
-        return data
+    class Meta:
+        model = WishList
+        fields = ('user', 'products')
+
+
+# class MyWishlistProductSerializer(serializers.ModelSerializer):
+#     wishlist = WishListSerializer(many=True, read_only=True)
+
+#     class Meta:
+#         model = Product
+#         fields = ('id',)
+
+

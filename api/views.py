@@ -12,16 +12,17 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework.authentication import TokenAuthentication
-import base64 as bs6
+from rest_framework.decorators import permission_classes, api_view
 
 
 User = get_user_model()
+
+
 
 class SignupAPIView(GenericAPIView):
 
     """
     An endpoint for the client to create a new User.
-
     """
 
     permission_classes = (AllowAny,)
@@ -35,6 +36,11 @@ class SignupAPIView(GenericAPIView):
         token = RefreshToken.for_user(user)
         data = serializer.data
         data["tokens"] = {"refresh": str(token), "access": str(token.access_token)}
+
+        wishlist = WishList()
+        wishlist.user = user
+        wishlist.save()
+
         return Response(data, status=status.HTTP_201_CREATED)
 
 
@@ -44,7 +50,6 @@ class LoginAPIView(GenericAPIView):
 
     """
     An endpoint to authenticate existing users using their email and password.
-
     """
 
     permission_classes = (AllowAny,)
@@ -60,7 +65,7 @@ class LoginAPIView(GenericAPIView):
         token = RefreshToken.for_user(user)
         data = serializer.data
         data["tokens"] = {"refresh": str(token), "access": str(token.access_token)}
-        print(user)
+        
         return Response(data, status=status.HTTP_200_OK)
 
 
@@ -68,8 +73,10 @@ class LoginAPIView(GenericAPIView):
 
 
 class LogoutAPIView(GenericAPIView):
+
     """
     An endpoint to logout users.
+
     """
 
     permission_classes = (IsAuthenticated,)
@@ -82,59 +89,6 @@ class LogoutAPIView(GenericAPIView):
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-# class RequestPasswordReset(GenericAPIView):
-#     serializer_class = ResetPasswordRequestSerializer
-
-#     def post(self, request):
-#         serializer = self.serializer_class(data=request.data)
-
-#         email = request.data['email']
-#         if User.objects.filter(email=email).exists():
-#             user = User.objects.get(email=email)
-#             uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
-#             token = PasswordResetTokenGenerator().make_token(user)
-#             current_site = get_current_site(request=request).domain
-#             relativeLink = reverse("password-reset-confirm", kwargs={'uidb64': uidb64, 'token': token})
-#             absurl = 'http://' + current_site + relativeLink
-#             # email_body = 'Hello, \n Use link below to reset your password  \n' + \
-#             #              absurl
-#             # data = {'email_body': email_body, 'to_email': user.email,
-#             #         'email_subject': 'Reset your passsword'}
-#             # sent_mail(data)
-#             return Response({'success': absurl}, status=status.HTTP_200_OK)
-#         else:
-#             return Response({'error': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# class PasswordTokenCheckAPI(GenericAPIView):
-
-#     def get(self, request, uidb64, token):
-#         try:
-#             id = smart_str(urlsafe_base64_decode(uidb64))
-#             user = User.objects.get(id=id)
-#             if not PasswordResetTokenGenerator().check_token(user, token):
-#                 return Response({'error': 'Token is not valid, please request a new one '}, status=status.HTTP_400_BAD_REQUEST)
-#             return Response({
-#                 'success': True,
-#                 'message': 'credential valid',
-#                 'uidb64': uidb64,
-#                 'token': token
-#             })
-#         except DjangoUnicodeDecodeError as identifier:
-#             return Response({'error': 'Token is not valid, please request a new one '}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class SetNewPasswordAPIView(GenericAPIView):
-#     serializer_class = SetNewPasswordSerializer
-#     def put(self, request):
-#         serializer = self.serializer_class(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)
 
 
 
@@ -162,14 +116,14 @@ class PasswordResetView(CreateAPIView):
         password_reset_url =f"http://localhost:8000/api/password-reset-confirm/{uid}/{token}/"
 
         # password_reset_url = reverse("password-reset-confirm", kwargs={"uidb64": uid, "token": token})
-        
+
         # send_mail(
         #     "Password reset",
         #     f"Use the following link to reset your password: {password_reset_url}",
         #     "from@example.com",
         #     [email],
         #     fail_silently=False,
-        # )
+        # ) 
         return Response({"Mesage": password_reset_url}, status=status.HTTP_200_OK)
 
 
@@ -201,8 +155,6 @@ class PasswordResetConfirmView(CreateAPIView):
             return Response({"detail": "Password reset successful."}, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Invalid password reset token."}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 
@@ -265,78 +217,56 @@ class CategoryListAPIView(ListAPIView):
     serializer_class = CategorySerializer
 
 
+class WishlistByIdentifierView(views.APIView):
 
-# class WishListView(mixins.CreateModelMixin, ListAPIView):
-#     permission_classes = (IsAuthenticated,)
-#     serializer_class = WishListSerializer
-#     queryset = WishList.objects.all()
-
-#     def perform_create(self, serializer):
-#         user = self.request.user
-#         products = self.request.data.get('products')
-
-#         for product in products:
-#             category = Product.objects.get(id=product).category
-
-#             if not WishList.objects.filter(user=user, category=category).exists():
-#                 serializer.save(user=user, product=product, category=category)
-#             else:
-#                 raise ValidationError('You can only add one product from each category.')
+    permission_classes = (AllowAny,)
+    
+    def get_object(self, pk):
+       
+        try:
+            return WishList.objects.get(user__email=pk)
+        except WishList.DoesNotExist:
+            raise Http404
 
 
-# class WishlistCreateAPIView(CreateAPIView):
-#     permission_classes = (AllowAny,)
-#     queryset = WishList.objects.all()
-#     serializer_class = WishListCreateSerializer
+    def get(self, request, user, format=None):
+    
+        wishlist = self.get_object(user)
+        serializer = WishlistByIdentifierSerializer(wishlist)
+        return Response(serializer.data)
 
 
-# class WishListProductListView(views.APIView):
-#     permission_classes = (IsAuthenticated,)
 
-#     def get(self, request):
 
-#         user = request.user
+class WishlistView(RetrieveUpdateDestroyAPIView):
+    queryset = WishList.objects.all()
+    serializer_class = WishListSerializer
+    permission_classes = [IsAuthenticated]
 
-#         # Get the wishlist ID and ordering fields from the request
-#         wishlist_id = request.GET.get('wishlist_id')
-#         ordering = request.GET.get('ordering')
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, user=self.request.user)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+
+
+class WishlistProductDeleteView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = WishList.objects.all()
+
+    def get_object(self):       
+        try:
+            return WishList.objects.get(user=self.request.user)
+        except WishList.DoesNotExist:
+            raise Http404
+
+    def put(self, instance, pk):
         
-#         # Split the ordering fields into a list
-#         ordering_fields = ordering.split(',') if ordering else []
-        
-#         # Get the wishlist and its products from the database, sorted by the ordering fields
-#         wishlist = WishList.objects.get(user=user)
-#         products = wishlist.products.all().order_by(*ordering_fields)
-        
-#         # Serialize the products using a serializer
-#         serializer = ProductSerializer(products, many=True)
-        
-#         # Return a response with the serialized data
-#         return Response({'products': serializer.data})
+        wishlist = self.get_object()
+        product = Product.objects.get(pk=pk)
+        products = wishlist.products
+        products.remove(product)
+        wishlist.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-
-
-# class WishListProductListViewByIdentifier(views.APIView):
-#     permission_classes = (AllowAny,)
-
-#     def get(self, request):
-        
-#         user = User
-
-#         # Get the wishlist ID and ordering fields from the request
-#         wishlist_id = request.GET.get('wishlist_id')
-#         ordering = request.GET.get('ordering')
-        
-#         # Split the ordering fields into a list
-#         ordering_fields = ordering.split(',') if ordering else []
-        
-#         # Get the wishlist and its products from the database, sorted by the ordering fields
-#         wishlist = WishList.objects.get(user=user)
-#         products = wishlist.products.all().order_by(*ordering_fields)
-        
-#         # Serialize the products using a serializer
-#         serializer = ProductSerializer(products, many=True)
-        
-#         # Return a response with the serialized data
-#         return Response({'products': serializer.data})

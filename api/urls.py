@@ -29,11 +29,9 @@ urlpatterns = [
     path('category/delete/<int:pk>/', CategoryDeleteAPIView.as_view(), name='category-delete'),
 
     # wishlist
-    # path('wishlist/', WishListView.as_view(), name='wishlist-create'),
-    # path('wishlist/view/', WishListProductListView.as_view(), name='wishlist-view'),
-    # path('wishlist/<str:pk>/view/', WishListProductListViewByIdentifier.as_view(), name='wishlist-view'),
-
-
-
+    path('wishlist/', WishlistView.as_view(), name='wishlist'),
+    path('wishlist/<user>/', WishlistByIdentifierView.as_view(), name='wishlist-view-by-identifier'),
+    path('wishlist/product_delete/<int:pk>/', WishlistProductDeleteView.as_view(), name='wishlist-product-delete-view'),
+    
     
 ]
