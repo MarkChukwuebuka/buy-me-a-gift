@@ -158,11 +158,11 @@ class PasswordResetConfirmView(CreateAPIView):
 
 
 
-
+# product
 class ProductListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     queryset = Product.objects.all()
-    serializer_class = ProductListSerializer
+    serializer_class = ProductSerializer
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -198,21 +198,15 @@ class ProductCreateAPIView(CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
-
-class CategoryCreateAPIView(CreateAPIView):
+# category
+class CategoryListCreateAPIView(ListCreateAPIView):
     permission_classes = (AllowAny,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
-class CategoryDeleteAPIView(DestroyAPIView):
+class CategoryRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-
-
-class CategoryListAPIView(ListAPIView):
-    permission_classes = (AllowAny,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
@@ -243,23 +237,13 @@ class WishlistView(RetrieveUpdateDestroyAPIView):
     serializer_class = WishListSerializer
     permission_classes = [IsAuthenticated]
 
+
     def get_object(self):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, user=self.request.user)
         self.check_object_permissions(self.request, obj)
         return obj
 
-
-
-class WishlistProductDeleteView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated]
-    queryset = WishList.objects.all()
-
-    def get_object(self):       
-        try:
-            return WishList.objects.get(user=self.request.user)
-        except WishList.DoesNotExist:
-            raise Http404
 
     def put(self, instance, pk):
         
@@ -269,4 +253,9 @@ class WishlistProductDeleteView(RetrieveUpdateDestroyAPIView):
         products.remove(product)
         wishlist.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
 

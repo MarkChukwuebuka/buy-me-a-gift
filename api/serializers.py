@@ -78,34 +78,22 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
 
 
-class ProductListSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
 
     category = serializers.CharField(source='category.name', read_only=True)
 
     class Meta:
         model = Product
         fields = (
-            'id',
+            
             'name',
             'category',
             'price',
             'created_time',
-            'rank'           
+               
         )
 
 
-class ProductSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Product
-        fields = (
-            
-            'name',
-            'price',
-            'category',
-            'rank',
-
-        )
 
 
 
@@ -114,7 +102,6 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
-
 
 
 
@@ -139,6 +126,8 @@ class WishListSerializer(serializers.ModelSerializer):
         return instance
 
 
+
+
 class WishlistByIdentifierSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.email', read_only=True)
 
@@ -146,12 +135,5 @@ class WishlistByIdentifierSerializer(serializers.ModelSerializer):
         model = WishList
         fields = ('user', 'products')
 
-
-# class MyWishlistProductSerializer(serializers.ModelSerializer):
-#     wishlist = WishListSerializer(many=True, read_only=True)
-
-#     class Meta:
-#         model = Product
-#         fields = ('id',)
 
 

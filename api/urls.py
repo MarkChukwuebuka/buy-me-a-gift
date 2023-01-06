@@ -17,21 +17,20 @@ urlpatterns = [
     
 
     # product
-    path('products/', ProductListAPIView.as_view(), name='product-list'),
+    path('product/', ProductListAPIView.as_view(), name='product-list'),
     path('product/detail/<int:pk>/', ProductDetailAPIView.as_view(), name='product-detail'),
     path('product/delete/<int:pk>/', ProductDeleteAPIView.as_view(), name='product-delete'),
     path('product/update/<int:pk>/', ProductUpdateAPIView.as_view(), name='product-update'),
     path('product/create/', ProductCreateAPIView.as_view(), name='product-create'),
 
     # category
-    path('category/create/', CategoryCreateAPIView.as_view(), name='category-create'),
-    path('category/list/', CategoryListAPIView.as_view(), name='category-list'),
-    path('category/delete/<int:pk>/', CategoryDeleteAPIView.as_view(), name='category-delete'),
+    path('category/', CategoryListCreateAPIView.as_view(), name='category-list-create'),
+    path('category/<int:pk>/', CategoryRetrieveUpdateDestroyAPIView.as_view(), name='category-retrive-update-destroy'),
 
     # wishlist
     path('wishlist/', WishlistView.as_view(), name='wishlist'),
     path('wishlist/<user>/', WishlistByIdentifierView.as_view(), name='wishlist-view-by-identifier'),
-    path('wishlist/product_delete/<int:pk>/', WishlistProductDeleteView.as_view(), name='wishlist-product-delete-view'),
+    path('wishlist/<int:pk>/', WishlistView.as_view(), name='wishlist-product-delete-view'),
     
     
 ]
