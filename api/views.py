@@ -190,17 +190,17 @@ class ProductDeleteAPIView(DestroyAPIView):
 class ProductUpdateAPIView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    serializer_class = ProductCreateUpdateSerializer
 
 
 class ProductCreateAPIView(CreateAPIView):
     permission_classes = (AllowAny,)
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    serializer_class = ProductCreateUpdateSerializer
 
 # category
 class CategoryListCreateAPIView(ListCreateAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 

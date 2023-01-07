@@ -89,11 +89,21 @@ class ProductSerializer(serializers.ModelSerializer):
             'name',
             'category',
             'price',
-            'created_time',
-               
+            'created_time',            
         )
 
+class ProductCreateUpdateSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Product
+        fields = (
+            
+            'name',
+            'category',
+            'price',
+            'created_time',     
+            'rank'       
+        )
 
 
 

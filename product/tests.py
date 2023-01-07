@@ -42,7 +42,7 @@ class ProductTest(TestCase):
         self.assertEqual(product.category, cat)
 
 
-class ProductTest(TestCase):
+class WishlistTest(TestCase):
 
     def test_create_wishlist(self):
 
@@ -78,10 +78,9 @@ class ProductTest(TestCase):
             user = user,
         )
 
-        wishlist = wishlist.products.add(product1, product2)
+        wishlist.products.add(product1, product2)
 
         self.assertEqual(wishlist.user.email, 'test@gmail.com')
-        self.assertEqual(wishlist.products, [product1, product2])
-        # self.assertEqual(product.rank, 2)
-        # self.assertEqual(product.category, cat)
+        self.assertEqual(list(wishlist.products.all()), [product1, product2])
+        
 
