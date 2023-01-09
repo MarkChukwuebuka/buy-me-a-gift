@@ -10,6 +10,7 @@ djangorestframework = "==3.14"
 djangorestframework-simplejwt = "*"
 validate-email = "*"
 drf-yasg = "*"
+mypy = "*"
 
 [dev-packages]
 
